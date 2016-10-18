@@ -50,6 +50,7 @@ my $g_running_seconds_limit = 10;
 my $g_skip_lock_all_tables;
 my $g_remove_orig_master_conf;
 my $g_interactive = 1;
+my $g_ignore_binlog_server_error;
 my $_server_manager;
 my $start_datetime;
 
@@ -253,7 +254,7 @@ sub identify_new_master {
   }
   $log->info(" ok.");
 
-  if ( $orig_master->{check_repl_filter} ) {
+  if ( !$g_ignore_binlog_server_error && $orig_master->{check_repl_filter} ) {
     check_filter( $orig_master, $new_master );
   }
 
@@ -707,21 +708,22 @@ sub main {
   POSIX::sigaction( SIGINT, $sigaction );
   local @ARGV = @_;
   my $a = GetOptions(
-    'global_conf=s'            => \$g_global_config_file,
-    'conf=s'                   => \$g_config_file,
-    'check_only'               => \$g_check_only,
-    'new_master_host=s'        => \$g_new_master_host,
-    'new_master_port=i'        => \$g_new_master_port,
-    'workdir=s'                => \$g_workdir,
-    'manager_workdir=s'        => \$g_workdir,
-    'interactive=i'            => \$g_interactive,
-    'orig_master_is_new_slave' => \$g_orig_master_is_new_slave,
-    'running_updates_limit=i'  => \$g_running_updates_limit,
-    'running_seconds_limit=i'  => \$g_running_seconds_limit,
-    'skip_lock_all_tables'     => \$g_skip_lock_all_tables,
-    'remove_dead_master_conf'  => \$g_remove_orig_master_conf,
-    'remove_orig_master_conf'  => \$g_remove_orig_master_conf,
-    'flush_tables=i'           => \$g_flush_tables,
+    'global_conf=s'              => \$g_global_config_file,
+    'conf=s'                     => \$g_config_file,
+    'check_only'                 => \$g_check_only,
+    'new_master_host=s'          => \$g_new_master_host,
+    'new_master_port=i'          => \$g_new_master_port,
+    'workdir=s'                  => \$g_workdir,
+    'manager_workdir=s'          => \$g_workdir,
+    'interactive=i'              => \$g_interactive,
+    'orig_master_is_new_slave'   => \$g_orig_master_is_new_slave,
+    'running_updates_limit=i'    => \$g_running_updates_limit,
+    'running_seconds_limit=i'    => \$g_running_seconds_limit,
+    'skip_lock_all_tables'       => \$g_skip_lock_all_tables,
+    'ignore_binlog_server_error' => \$g_ignore_binlog_server_error,
+    'remove_dead_master_conf'    => \$g_remove_orig_master_conf,
+    'remove_orig_master_conf'    => \$g_remove_orig_master_conf,
+    'flush_tables=i'             => \$g_flush_tables,
   );
   if ( $#ARGV >= 0 ) {
     print "Unknown options: ";
